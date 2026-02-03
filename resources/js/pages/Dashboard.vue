@@ -2,8 +2,10 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
-import PlaceholderPattern from '../components/PlaceholderPattern.vue';
+import { Head, usePage } from '@inertiajs/vue3';
+
+const page = usePage();
+const containers = page.props.containers;
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -22,22 +24,23 @@ const breadcrumbs: BreadcrumbItem[] = [
         >
             <div class="grid auto-rows-min gap-4 md:grid-cols-3">
                 <div
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
+                    v-for="{
+                        id,
+                        image,
+                        name,
+                        status,
+                    } in containers"
+                    :key="id"
+                    class="relative aspect-video overflow-hidden rounded-xl border p-4"
                 >
+                    <h2 class="text-lg font-semibold">
+                        {{ name }}
+                    </h2>
 
+                    <p class="text-sm text-gray-500">Image: {{ image }}</p>
+
+                    <p class="text-sm text-gray-500">Status: {{ status }}</p>
                 </div>
-                <div
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-                >
-                </div>
-                <div
-                    class="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border"
-                >
-                </div>
-            </div>
-            <div
-                class="relative min-h-[100vh] flex-1 rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border"
-            >
             </div>
         </div>
     </AppLayout>

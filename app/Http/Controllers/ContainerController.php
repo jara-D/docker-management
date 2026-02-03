@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\ContainerSyncService;
 use Illuminate\Http\Request;
 use App\Adapters\ContainerInterface;
 
@@ -53,5 +54,15 @@ class ContainerController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function sync(Request $request)
+    {
+        $json = $this->adapter->listContainers();
+        $service = app(ContainerSyncService::class);
+        $service->sync($json);
+
+        return response()->json(['message' => 'Containers synced']);
+
     }
 }
