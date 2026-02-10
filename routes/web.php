@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ContainerController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -15,6 +16,16 @@ use App\Http\Controllers\DashboardController;
 Route::get('dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
+
+Route::controller(ContainerController::class)
+    ->prefix('containers')
+    ->name('containers.')
+    ->group(function () {
+        Route::post('sync', 'sync')->name('sync');
+        Route::post('{id}/start', 'start')->name('start');
+        Route::post('{id}/stop', 'stop')->name('stop');
+    });
+
 
 
 require __DIR__.'/settings.php';

@@ -11,4 +11,6 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/container',[ContainerController::class,'index'] );
 
-Route::get('/containers/sync',[ContainerController::class,'sync'] );
+Route::post('/containers/sync',[ContainerController::class,'sync'] );
+Route::post('/containers/{id}/start',[ContainerController::class,'start'] );
+Route::post('/containers/{id}/stop',[ContainerController::class,'stop'] );

@@ -24,37 +24,16 @@ class ContainerController extends Controller
         return response()->json($this->adapter->listContainers());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function start(string $id)
     {
-        //
+        return response()->json($this->adapter->startContainer($id));
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function stop(string $id)
     {
-        //
+        return response()->json($this->adapter->stopContainer($id));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
-    }
 
     public function sync(Request $request)
     {
