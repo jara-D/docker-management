@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Adapters\Interface\ContainerInterface;
 use App\Services\ContainerSyncService;
 use Illuminate\Http\Request;
-use App\Adapters\ContainerInterface;
 
 class ContainerController extends Controller
 {

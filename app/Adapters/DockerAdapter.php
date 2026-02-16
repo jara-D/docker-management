@@ -4,6 +4,7 @@ namespace App\Adapters;
 
 // This interface is for implementing the functionality
 
+use App\Adapters\Interface\ContainerInterface;
 use GuzzleHttp\Client;
 
 class DockerAdapter implements ContainerInterface

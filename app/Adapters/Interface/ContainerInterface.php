@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Adapters;
+namespace App\Adapters\Interface;
 
 // This interface lists what is possible
 // This is done so we can swap the implementation easily
@@ -16,4 +16,6 @@ interface ContainerInterface
     public function removeContainer(string $id): bool;
 
     public function listImages(): array;
+
+    public function createContainerFromCompose(string $id): bool;
 }

@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Adapters\ContainerInterface;
 use App\Adapters\DockerAdapter;
+use App\Adapters\Interface\ContainerInterface;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
