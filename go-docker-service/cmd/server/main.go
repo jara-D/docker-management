@@ -2,14 +2,19 @@ package main
 
 import (
 	"log"
-	"net/http"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-    http.HandleFunc("/health", health)
-	http.HandleFunc("/compose/up", handleUp)
-	http.HandleFunc("/compose/down", handleDown)
+	router := gin.Default()
+	router.GET("/health", HealthHandler)
+	router.POST("/compose/up", DownHandler)
+	router.POST("/compose/down", UpHandler)
 
 	log.Println("Go Docker Service running on :8081")
-	http.ListenAndServe(":8081", nil)
+	err := router.Run("localhost:8081")
+	if err != nil {
+		return
+	}
 }

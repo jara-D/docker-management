@@ -42,11 +42,7 @@ services:
         networks:
             - sail
         healthcheck:
-            test:
-                - CMD
-                - mysqladmin
-                - ping
-                - '-p${DB_PASSWORD}'
+            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
             retries: 3
             timeout: 5s
     go-service:
@@ -62,6 +58,12 @@ services:
             - sail
         depends_on:
             - laravel.test
+#        healthcheck:
+#            test: ["CMD", "wget", "--spider", "-q", "http://localhost:8081/health"]
+#            interval: 10s
+#            timeout: 3s
+#            retries: 3
+#            start_period: 5s
 networks:
     sail:
         driver: bridge

@@ -50,4 +50,13 @@ class DockerAdapter implements ContainerInterface
         $response = $this->client->get('/images/json');
         return json_decode($response->getBody()->getContents(), true);
     }
+
+    /**
+     * @param string $id
+     * @return bool
+     */
+    public function createContainerFromCompose(string $id): bool
+    {
+        // TODO: Implement createContainerFromCompose() method.
+    }
 }

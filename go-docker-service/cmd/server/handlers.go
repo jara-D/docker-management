@@ -1,59 +1,70 @@
 package main
 
 import (
-	"encoding/json"
-	"io"
-	"net/http"
+    "log"
+    "net/http"
 
-	"go-docker-service/internal/compose"
+    "go-docker-service/internal"
+    "go-docker-service/internal/compose"
+
+    "github.com/gin-gonic/gin"
 )
 
-type UpRequest struct {
-	Yaml string `json:"yaml"`
+type ComposeRequest struct {
+    Yaml string `json:"yaml"`
 }
 
-func handleUp(w http.ResponseWriter, r *http.Request) {
-	body, _ := io.ReadAll(r.Body)
+func UpHandler(c *gin.Context) {
+    var req ComposeRequest
 
-	var req UpRequest
-	if err := json.Unmarshal(body, &req); err != nil {
-		http.Error(w, "invalid JSON", 400)
-		return
-	}
+    if err := c.BindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
+        return
+    }
 
-	if req.Yaml == "" {
-		http.Error(w, "missing yaml field", 400)
-		return
-	}
+    if req.Yaml == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "missing yaml field"})
+        return
+    }
 
-	if err := compose.Up(req.Yaml); err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
+    if err := compose.Up(req.Yaml); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
 
-	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+    c.JSON(http.StatusOK, gin.H{"status": "OK"})
 }
 
-func handleDown(w http.ResponseWriter, r *http.Request) {
-	body, _ := io.ReadAll(r.Body)
+func DownHandler(c *gin.Context) {
+    var req ComposeRequest
 
-	var req UpRequest
-	if err := json.Unmarshal(body, &req); err != nil {
-		http.Error(w, "invalid JSON", 400)
-		return
-	}
+    if err := c.BindJSON(&req); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "invalid JSON"})
+        return
+    }
 
-	if req.Yaml == "" {
-		http.Error(w, "missing yaml field", 400)
-		return
-	}
+    if req.Yaml == "" {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "missing yaml field"})
+        return
+    }
 
-	if err := compose.Down(req.Yaml); err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
+    if err := compose.Down(req.Yaml); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
 
-	w.WriteHeader(200)
-	w.Write([]byte("OK"))
+    c.JSON(http.StatusOK, gin.H{"status": "OK"})
+}
+
+func HealthHandler(c *gin.Context) {
+    if err := internal.CheckHealth(); err != nil {
+        c.JSON(http.StatusServiceUnavailable, gin.H{
+            "status": "unhealthy",
+            "error":  err.Error(),
+        })
+        log.Printf("health check failed")
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{"status": "healthy"})
 }
