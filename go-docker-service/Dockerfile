@@ -1,21 +1,33 @@
-FROM golang:1.24.3-alpine AS builder
+# --- Build stage ---
+FROM golang:1.25-alpine AS builder
 
-WORKDIR /go-docker-service
+WORKDIR /src
 
-# Install build dependencies for CGO
 RUN apk add --no-cache gcc g++ libc-dev
 
-ENV CGO_ENABLED=1
-ENV GOOS=linux
-ENV GOARCH=amd64
+ENV CGO_ENABLED=1 GOOS=linux GOARCH=amd64
 
 COPY . .
-RUN go build -o server ./cmd/server
+RUN go build -o /bin/server ./cmd/server
 
-FROM alpine:3.19
+# --- Dev stage ---
+FROM golang:1.25-alpine AS dev
+
 WORKDIR /app
 
-COPY --from=builder /go-docker-service/server .
+RUN apk add --no-cache gcc g++ libc-dev
+RUN go install github.com/air-verse/air@latest
 
-EXPOSE 8081
-CMD ["./server"]
+COPY . .
+
+CMD ["air"]
+
+# --- Production stage ---
+FROM alpine:3.19
+
+WORKDIR /app
+
+COPY --from=builder /bin/server /bin/server
+
+EXPOSE 8080
+CMD ["/bin/server"]

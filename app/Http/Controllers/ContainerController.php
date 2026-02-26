@@ -42,6 +42,10 @@ class ContainerController extends Controller
         $service->sync($json);
 
         return response()->json(['message' => 'Containers synced']);
+    }
 
+    public function CreateContainer(Request $request)
+    {
+        return response()->json($this->adapter->createContainerFromCompose($request));
     }
 }

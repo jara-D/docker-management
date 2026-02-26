@@ -1,20 +1,40 @@
 package main
 
 import (
-	"log"
+    "go-docker-service/internal/docker"
 
-	"github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin"
 )
 
 func main() {
-	router := gin.Default()
-	router.GET("/health", HealthHandler)
-	router.POST("/compose/up", DownHandler)
-	router.POST("/compose/down", UpHandler)
+    svc, err := docker.NewDockerService("")
+    if err != nil {
+        panic(err)
+    }
+    defer svc.Close()
 
-	log.Println("Go Docker Service running on :8081")
-	err := router.Run("localhost:8081")
-	if err != nil {
-		return
-	}
+    router := setupRouter(svc)
+    router.Run()
+
+}
+
+func setupRouter(svc *docker.DockerService) *gin.Engine {
+    r := gin.Default()
+
+    r.GET("/", wrap(svc, ServiceHealth))
+
+    {
+        container := r.Group("/container")
+        container.GET("/list", wrap(svc, list))
+        container.GET("/start/:id", wrap(svc, start))
+        container.GET("/stop/:id", wrap(svc, stop))
+        container.GET("/restart/:id", wrap(svc, restart))
+        container.GET("/remove/:id", wrap(svc, remove))
+    }
+
+    return r
+}
+
+func wrap(svc *docker.DockerService, fn func(*gin.Context, *docker.DockerService)) gin.HandlerFunc {
+    return func(c *gin.Context) { fn(c, svc) }
 }

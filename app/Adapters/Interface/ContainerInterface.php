@@ -17,5 +17,5 @@ interface ContainerInterface
 
     public function listImages(): array;
 
-    public function createContainerFromCompose(string $id): bool;
+    public function createContainerFromCompose(string $Yaml): bool;
 }

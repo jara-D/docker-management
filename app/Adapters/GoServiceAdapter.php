@@ -12,15 +12,15 @@ class GoServiceAdapter implements ContainerInterface
     public function __construct()
     {
         $this->client = new Client([
-            'base_uri' => 'http://localhost:8081',
+            'base_uri' => 'http://go-service:8080',
         ]);
     }
 
     /**
-     * @param string $id
+     * @param string $Yaml
      * @return bool
      */
-    public function createContainerFromCompose(string $id): bool
+    public function createContainerFromCompose(string $Yaml): bool
     {
         $response = $this->client->post('/compose/up');
         return json_decode($response->getBody()->getContents(), true);
@@ -41,7 +41,8 @@ class GoServiceAdapter implements ContainerInterface
      */
     public function listContainers(): array
     {
-        // TODO: Implement listContainers() method.
+        $response = $this->client->get('/container/list');
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**

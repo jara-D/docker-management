@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Adapters\DockerAdapter;
+use App\Adapters\GoServiceAdapter;
 use App\Adapters\Interface\ContainerInterface;
 use Illuminate\Support\ServiceProvider;
 
@@ -13,7 +14,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(ContainerInterface::class, DockerAdapter::class);
+//        $this->app->bind(ContainerInterface::class, DockerAdapter::class);
+        $this->app->bind(ContainerInterface::class, GoServiceAdapter::class);
     }
 
     /**
