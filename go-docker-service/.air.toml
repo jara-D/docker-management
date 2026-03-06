@@ -1,3 +1,4 @@
+log_level = "warn"
 root = "."
 tmp_dir = "tmp"
 
@@ -6,3 +7,4 @@ cmd = "go build -o ./tmp/main ./cmd/server"
 bin = "tmp/main"
 include_ext = ["go"]
 exclude_dir = ["tmp"]
+poll_interval = 1000 # ms

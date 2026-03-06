@@ -9,13 +9,13 @@ interface ContainerInterface
 {
     public function listContainers(): array;
 
-    public function startContainer(string $id): bool;
+    public function startContainer(string $id): array;
 
-    public function stopContainer(string $id): bool;
+    public function stopContainer(string $id): array;
 
-    public function removeContainer(string $id): bool;
+    public function removeContainer(string $id): array;
 
     public function listImages(): array;
 
-    public function createContainerFromCompose(string $Yaml): bool;
+    public function createContainerFromCompose(array $payload): array;
 }

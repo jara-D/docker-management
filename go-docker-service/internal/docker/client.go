@@ -30,6 +30,8 @@ func (s *DockerService) Close() error {
 	return s.cli.Close()
 }
 
+func (s *DockerService) Client() *client.Client { return s.cli }
+
 // NewDockerServiceTLS untested
 func NewDockerServiceTLS(host, ca, cert, key string) (*DockerService, error) {
 	opts := []client.Opt{

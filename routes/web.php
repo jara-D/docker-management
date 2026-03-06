@@ -24,6 +24,8 @@ Route::controller(ContainerController::class)
         Route::post('sync', 'sync')->name('sync');
         Route::post('{id}/start', 'start')->name('start');
         Route::post('{id}/stop', 'stop')->name('stop');
+        Route::post('compose/up', 'createContainer')->name('compose.up');
+        Route::post('compose/down/{project}', 'createContainer')->name('compose.down');
     });
 
 

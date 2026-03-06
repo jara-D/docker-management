@@ -2,7 +2,10 @@
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head, usePage, router } from '@inertiajs/vue3';
+import { Head, usePage, router, Form } from '@inertiajs/vue3';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { reactive } from 'vue';
 
 const page = usePage();
 const containers = page.props.containers;
@@ -13,6 +16,11 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: dashboard().url,
     },
 ];
+
+const form = reactive({ projectName: '', yaml: '' });
+const submit = () => {
+    router.post('/containers/compose/up', form);
+};
 </script>
 
 <template>
@@ -28,6 +36,13 @@ const breadcrumbs: BreadcrumbItem[] = [
             >
                 sync
             </button>
+            <Form @submit.prevent="submit">
+                <Input name="projectName" v-model="form.projectName" />
+                <textarea name="yaml" v-model="form.yaml"></textarea>
+
+                <Button type="submit">Submit</Button>
+            </Form>
+
             <div class="grid auto-rows-min gap-4 md:grid-cols-3">
                 <div
                     v-for="{

@@ -4,6 +4,7 @@ namespace App\Adapters;
 
 use App\Adapters\Interface\ContainerInterface;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 
 class GoServiceAdapter implements ContainerInterface
 {
@@ -17,22 +18,28 @@ class GoServiceAdapter implements ContainerInterface
     }
 
     /**
-     * @param string $Yaml
-     * @return bool
+     * @param array $payload
+     * @return array
      */
-    public function createContainerFromCompose(string $Yaml): bool
+    public function createContainerFromCompose(array $payload): array
     {
-        $response = $this->client->post('/compose/up');
+        $response = $this->client->post('/compose/up', [
+            'json' => $payload
+        ]);
+
         return json_decode($response->getBody()->getContents(), true);
     }
 
+
     /**
-     * @param string $id
-     * @return bool
+     * @param string $projectName
+     * @return array
+     * @throws GuzzleException
      */
-    public function RemoveContainerFromCompose(string $id): bool
+    public function RemoveContainerFromCompose(string $projectName): array
     {
-        $response = $this->client->post('/compose/down');
+        $response = $this->client->post('/compose/down/' . $projectName);
+
         return json_decode($response->getBody()->getContents(), true);
     }
 
@@ -41,33 +48,36 @@ class GoServiceAdapter implements ContainerInterface
      */
     public function listContainers(): array
     {
-        $response = $this->client->get('/container/list');
+        $response = $this->client->get('/container/');
         return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
      * @param string $id
-     * @return bool
+     * @return array
+     * @throws GuzzleException
      */
-    public function startContainer(string $id): bool
+    public function startContainer(string $id): array
     {
-        // TODO: Implement startContainer() method.
+        $response = $this->client->post('/container/' . $id . '/start');
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
      * @param string $id
-     * @return bool
+     * @return array
      */
-    public function stopContainer(string $id): bool
+    public function stopContainer(string $id): array
     {
-        // TODO: Implement stopContainer() method.
+        $response = $this->client->post('/container/' . $id . '/stop');
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
      * @param string $id
-     * @return bool
+     * @return array
      */
-    public function removeContainer(string $id): bool
+    public function removeContainer(string $id): array
     {
         // TODO: Implement removeContainer() method.
     }

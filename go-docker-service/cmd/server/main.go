@@ -1,6 +1,7 @@
 package main
 
 import (
+    "go-docker-service/internal/compose"
     "go-docker-service/internal/docker"
 
     "github.com/gin-gonic/gin"
@@ -8,33 +9,42 @@ import (
 
 func main() {
     svc, err := docker.NewDockerService("")
+    cw, err := compose.NewComposeWrapper()
     if err != nil {
         panic(err)
     }
     defer svc.Close()
 
-    router := setupRouter(svc)
-    router.Run()
+    r := setupRouter(svc, cw)
+    r.SetTrustedProxies([]string{"172.16.0.0/12"})
+    r.Run(":8080")
 
 }
 
-func setupRouter(svc *docker.DockerService) *gin.Engine {
+func setupRouter(svc *docker.DockerService, cw *compose.ComposeWrapper) *gin.Engine {
     r := gin.Default()
 
-    r.GET("/", wrap(svc, ServiceHealth))
+    h := &Handler{
+        svc: svc,
+        cw:  cw,
+    }
 
+    r.GET("/", h.ServiceHealth)
+
+    container := r.Group("/container")
     {
-        container := r.Group("/container")
-        container.GET("/list", wrap(svc, list))
-        container.GET("/start/:id", wrap(svc, start))
-        container.GET("/stop/:id", wrap(svc, stop))
-        container.GET("/restart/:id", wrap(svc, restart))
-        container.GET("/remove/:id", wrap(svc, remove))
+        container.GET("/", h.list)
+        container.POST("/:id/start", h.start)
+        container.POST("/:id/stop", h.stop)
+        container.POST("/:id/restart", h.restart)
+        container.DELETE("/:id", h.remove)
+    }
+
+    composeGroup := r.Group("/compose")
+    {
+        composeGroup.POST("/up", h.Up)
+        composeGroup.POST("/down/:project", h.Down)
     }
 
     return r
-}
-
-func wrap(svc *docker.DockerService, fn func(*gin.Context, *docker.DockerService)) gin.HandlerFunc {
-    return func(c *gin.Context) { fn(c, svc) }
 }
