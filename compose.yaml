@@ -42,13 +42,24 @@ services:
         networks:
             - sail
         healthcheck:
-            test:
-                - CMD
-                - mysqladmin
-                - ping
-                - '-p${DB_PASSWORD}'
+            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
             retries: 3
             timeout: 5s
+    go-service:
+        container_name: go-service
+        build:
+            context: ./go-docker-service
+            dockerfile: Dockerfile
+            target: dev
+        volumes:
+            - ./go-docker-service:/app
+            - /var/run/docker.sock:/var/run/docker.sock
+        ports:
+            - "8080:8080"
+        networks:
+            - sail
+        depends_on:
+            - laravel.test
 networks:
     sail:
         driver: bridge
