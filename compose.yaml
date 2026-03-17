@@ -1,29 +1,67 @@
 services:
+    traefik:
+        image: traefik:v3.6
+        container_name: traefik
+        networks:
+            - proxy
+        ports:
+            - "80:80"
+            - "443:443"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ./certs:/certs:ro
+            - ./dynamic:/dynamic:ro
+        command:
+            - "--entrypoints.web.address=:80"
+            - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+            - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+            - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+            - "--entrypoints.websecure.address=:443"
+            - "--entrypoints.websecure.http.tls=true"
+            - "--providers.file.filename=/dynamic/tls.yaml"
+            - "--providers.docker=true"
+            - "--providers.docker.exposedbydefault=false"
+            - "--providers.docker.network=proxy"
+            - "--api.dashboard=true"
+            - "--api.insecure=false"
+            - "--log.level=INFO"
+            - "--accesslog=true"
+            - "--metrics.prometheus=true"
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.dashboard.rule=Host(`traefik.sili.localhost`)"
+            - "traefik.http.routers.dashboard.entrypoints=websecure"
+            - "traefik.http.routers.dashboard.service=api@internal"
+            - "traefik.http.routers.dashboard.tls=true"
+
     laravel.test:
         build:
             context: './vendor/laravel/sail/runtimes/8.5'
             dockerfile: Dockerfile
-            args:
-                WWWGROUP: '${WWWGROUP}'
         image: 'sail-8.5/app'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
-        ports:
-            - '${APP_PORT:-80}:80'
-            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
         environment:
-            WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
             XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
         volumes:
             - '.:/var/www/html'
-            - '/var/run/docker.sock:/var/run/docker.sock'
         networks:
             - sail
+            - proxy
         depends_on:
             - mysql
+        ports:
+            - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.laravel.rule=Host(`dashboard.sili.localhost`)"
+            - "traefik.http.routers.laravel.entrypoints=websecure"
+            - "traefik.http.routers.laravel.tls=true"
+            - "traefik.http.services.laravel.loadbalancer.server.port=80"
+
     mysql:
         image: 'mysql:8.4'
         ports:
@@ -42,16 +80,31 @@ services:
         networks:
             - sail
         healthcheck:
-            test:
-                - CMD
-                - mysqladmin
-                - ping
-                - '-p${DB_PASSWORD}'
+            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
             retries: 3
             timeout: 5s
+
+    go-service:
+        container_name: go-service
+        build:
+            context: ./go-docker-service
+            dockerfile: Dockerfile
+            target: dev
+        volumes:
+            - ./go-docker-service:/app
+            - /var/run/docker.sock:/var/run/docker.sock
+        networks:
+            - sail
+        depends_on:
+            - laravel.test
+
 networks:
     sail:
         driver: bridge
+    proxy:
+        name: proxy
+        driver: bridge
+
 volumes:
     sail-mysql:
         driver: local

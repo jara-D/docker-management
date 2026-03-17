@@ -1,0 +1,4 @@
+tls:
+  certificates:
+    - certFile: /certs/_wildcard.sili.localhost.pem
+      keyFile:  /certs/_wildcard.sili.localhost-key.pem

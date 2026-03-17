@@ -3,19 +3,11 @@ import { ref } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
-import { Head, usePage, router } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import ContainerCard from '@/components/ContainerCard.vue';
 import NewInstance from '@/components/NewInstance.vue';
 import CreateInstanceCard from '@/components/CreateInstanceCard.vue';
 
-interface Container {
-    id: number;
-    container_id: string;
-    name: string;
-    status: string;
-}
-
-const page = usePage();
 const showModal = ref(false);
 
 const containers = Array.from({ length: 6 }, (_, i) => ({
