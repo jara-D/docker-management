@@ -95,7 +95,7 @@ services:
             target: dev
         volumes:
             - ./go-docker-service:/app
-            - /var/run/docker.sock:/var/run/docker.sock
+            - /var/run/docker-users.sock:/var/run/docker.sock
         networks:
             - sail
         depends_on:

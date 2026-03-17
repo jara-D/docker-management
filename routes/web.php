@@ -21,6 +21,7 @@ Route::controller(ContainerController::class)
     ->prefix('containers')
     ->name('containers.')
     ->group(function () {
+        Route::get('', 'index')->name('index');
         Route::post('sync', 'sync')->name('sync');
         Route::post('{id}/start', 'start')->name('start');
         Route::post('{id}/stop', 'stop')->name('stop');

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/compose-spec/compose-go/v2/types"
 	"github.com/docker/compose/v5/pkg/api"
 )
 
@@ -29,9 +30,31 @@ func (cw *ComposeWrapper) Up(yamlContent, projectName string) error {
 		return fmt.Errorf("invalid compose project: %w", err)
 	}
 
+	enforceKataRuntime(project)
+
 	// Bring up
 	return cw.cs.Up(ctx, project, api.UpOptions{
 		Create: api.CreateOptions{},
 		Start:  api.StartOptions{},
 	})
+}
+
+func enforceKataRuntime(p *types.Project) {
+	for i, svc := range p.Services {
+		// Ensure Deploy exists
+		if svc.Deploy == nil {
+			svc.Deploy = &types.DeployConfig{}
+		}
+
+		// Ensure Extensions map exists
+		if svc.Deploy.Extensions == nil {
+			svc.Deploy.Extensions = types.Extensions{}
+		}
+
+		// Set the runtime
+		svc.Deploy.Extensions["runtime"] = "kata-runtime"
+
+		// Write back into the slice
+		p.Services[i] = svc
+	}
 }
