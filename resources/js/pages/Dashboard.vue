@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { ref } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage, router } from '@inertiajs/vue3';
 import ContainerCard from '@/components/ContainerCard.vue';
+import NewInstance from '@/components/NewInstance.vue';
+import CreateInstanceCard from '@/components/CreateInstanceCard.vue';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface Container {
     id: number;
     container_id: string;
@@ -13,9 +15,10 @@ interface Container {
     status: string;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const page = usePage();
-const containers = Array.from({ length: 1000 }, (_, i) => ({
+const showModal = ref(false);
+
+const containers = Array.from({ length: 6 }, (_, i) => ({
     id: i + 1,
     container_id: i + 1,
     image: `image-${i + 1}`,
@@ -37,13 +40,12 @@ const breadcrumbs: BreadcrumbItem[] = [
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
             <button
-                class="mt-4 rounded bg-blue-600 px-3 py-1 text-white"
+                class="mt-4 rounded bg-blue-600 px-3 py-1 text-white w-fit"
                 @click="router.post(`/containers/sync`)"
             >
                 sync
             </button>
-            <div class="grid auto-rows-min gap-4 grid-cols-1 md:grid-cols-3 lg:grid-cols-3">
-                <!-- <div class="grid auto-rows-min gap-4 md:grid-cols-auto"></div> -->
+            <div class="grid gap-4 grid-cols-1 md:grid-cols-3 lg:grid-cols-3 auto-rows-[250px]">
                 <ContainerCard
                     v-for="container in containers"
                     :key="container.id"
@@ -52,7 +54,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                     :name="container.name"
                     :status="container.status"
                 />
+                <CreateInstanceCard @open="showModal = true" />
             </div>
         </div>
+
+        <NewInstance v-if="showModal" @close="showModal = false" />
     </AppLayout>
 </template>

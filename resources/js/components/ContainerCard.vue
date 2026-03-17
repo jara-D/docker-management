@@ -4,95 +4,45 @@ import playIcon from '/resources/images/play.svg'
 import stopIcon from '/resources/images/stop.svg'
 import placeholderIcon from '/resources/images/placeholder.svg'
 
-interface Props {
+const props = defineProps<{
     id: number;
     container_id: string;
     name: string;
     status: string;
-}
+}>();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const props = defineProps<Props>();
+const containerName = props.name.includes('/')
+    ? props.name.split('/').pop() || props.name
+    : props.name;
 
-const getContainerName = (name: string) => {
-    if (name.includes('/')) {
-        return name.split('/').pop() || name;
-    }
-    return name;
-};
-console.log("v8")
+const stop = () => router.post(`/containers/${props.container_id}/stop`);
+const start = () => router.post(`/containers/${props.container_id}/start`);
 </script>
 
 <template>
-    <div class="relative overflow-hidden rounded-xl bg-gray-200 p-6">
-        <!-- Container names in 2x2 grid - no gaps between text -->
-        <div class="mb-6">
-            <div class="text-2xl font-normal leading-tight text-gray-900">
-                {{ getContainerName(name) }} {{ getContainerName(name) }}
-            </div>
-            <div class="text-2xl font-normal leading-tight text-gray-900">
-                {{ getContainerName(name) }} {{ getContainerName(name) }}
+    <div class="relative overflow-hidden rounded-xl bg-sidebar p-4 md:p-6 flex flex-col min-h-40 md:min-h-48">
+        <div class="mb-4 md:mb-6">
+            <div class="text-lg md:text-2xl font-normal leading-tight text-white truncate">
+                {{ containerName }}
             </div>
         </div>
 
-        <!-- Status section -->
-        <div class="space-y-2">
-            <p class="text-sm text-gray-700">
-                Status: {{ status }}
-            </p>
+        <div class="space-y-2 mt-auto">
+            <p class="text-xs md:text-sm text-gray-400">Status: {{ status }}</p>
 
-            <!-- Diamond icons row -->
             <div class="flex gap-0 border-2 border-gray-600 w-fit">
-                <button class="h-6 w-6 bg-gray-400 bg-red-600 text-sm text-white hover:bg-red-700"
-                    @click="router.post(`/containers/${container_id}/stop`)">
-                    <img :src="stopIcon" alt="stop">
+                <button class="h-8 w-8 md:h-10 md:w-10 bg-red-600 text-sm text-white hover:bg-red-700" @click="stop">
+                    <img :src="stopIcon" alt="stop" class="w-full h-full">
                 </button>
 
-                <button class="h-6 w-6 bg-blue-400 bg-blue-600 text-sm text-white hover:bg-blue-700"
-                    @click="router.post(`/containers/${container_id}/stop`)">
-                    <img :src="placeholderIcon" alt="placeholder">
-                </button>
-                <button class="h-6 w-6 bg-blue-400 bg-blue-600 text-sm text-white hover:bg-blue-700"
-                    @click="router.post(`/containers/${container_id}/stop`)">
-                    <img :src="placeholderIcon" alt="placeholder">
-                </button>
-                <button class="h-6 w-6 bg-blue-400 bg-blue-600 text-sm text-white hover:bg-blue-700"
-                    @click="router.post(`/containers/${container_id}/stop`)">
-                    <img :src="placeholderIcon" alt="placeholder">
-                </button>
-                <button class="h-6 w-6 bg-blue-400 bg-blue-600 text-sm text-white hover:bg-blue-700"
-                    @click="router.post(`/containers/${container_id}/stop`)">
-                    <img :src="placeholderIcon" alt="placeholder">
-                </button>
-                <button class="h-6 w-6 bg-blue-400 bg-blue-600 text-sm text-white hover:bg-blue-700"
-                    @click="router.post(`/containers/${container_id}/stop`)">
-                    <img :src="placeholderIcon" alt="placeholder">
+                <button v-for="_ in 5" class="h-8 w-8 md:h-10 md:w-10 bg-blue-600 text-sm text-white hover:bg-blue-700" @click="stop">
+                    <img :src="placeholderIcon" alt="placeholder" class="w-full h-full">
                 </button>
 
-                <button class="h-6 w-6 bg-gray-400 bg-green-600 text-sm text-white hover:bg-green-700"
-                    @click="router.post(`/containers/${container_id}/start`)">
-                    <img :src="playIcon" alt="play">
+                <button class="h-8 w-8 md:h-10 md:w-10 bg-green-600 text-sm text-white hover:bg-green-700" @click="start">
+                    <img :src="playIcon" alt="play" class="w-full h-full">
                 </button>
-
-                <!-- <div v-for="i in 7" :key="i" class="h-6 w-6 bg-gray-400">
-                    <button class="bg-blue-600 text-sm text-white hover:bg-blue-700"
-                        @click="router.post(`/containers/${container_id}/start`)">
-                        <img :src="playIcon" alt="play">
-                    </button>
-                </div> -->
             </div>
-
-            <!-- Action buttons -->
-            <!-- <div class="flex gap-2 pt-2">
-                <button class="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
-                    @click="router.post(`/containers/${container_id}/start`)">
-                    Start
-                </button>
-                <button class="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
-                    @click="router.post(`/containers/${container_id}/stop`)">
-                    Stop
-                </button>
-            </div> -->
         </div>
     </div>
 </template>
