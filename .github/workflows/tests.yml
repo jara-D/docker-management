@@ -48,6 +48,13 @@ jobs:
       - name: Generate Application Key
         run: ./vendor/bin/sail artisan key:generate
 
+      - name: Wait for MySQL
+        run: |
+          until ./vendor/bin/sail exec mysql mysqladmin ping -h mysql --silent; do
+          echo "Waiting for MySQL..."
+          sleep 2
+          done
+
       - name: Run Migrations
         run: ./vendor/bin/sail artisan migrate
 
