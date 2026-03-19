@@ -2,17 +2,28 @@ name: tests
 
 on:
   push:
-    branches:
-      - develop
-      - main
+    branches: [develop, main]
   pull_request:
-    branches:
-      - develop
-      - main
+    branches: [develop, main]
 
 jobs:
   ci:
     runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: testing
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -ppassword"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,7 +31,8 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.5
+          php-version: 8.2
+          extensions: mbstring, pdo_mysql, intl
           tools: composer:v2
           coverage: xdebug
 
@@ -30,7 +42,7 @@ jobs:
       - name: Configure DB for CI
         run: |
           echo "DB_CONNECTION=mysql" >> .env
-          echo "DB_HOST=mysql" >> .env
+          echo "DB_HOST=127.0.0.1" >> .env
           echo "DB_PORT=3306" >> .env
           echo "DB_DATABASE=testing" >> .env
           echo "DB_USERNAME=root" >> .env
@@ -39,34 +51,28 @@ jobs:
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Start Sail
-        run: ./vendor/bin/sail up -d --build
-
-      - name: Fix permissions
-        run: chmod -R 777 storage bootstrap/cache && chmod 777 .env
-
       - name: Generate Application Key
-        run: ./vendor/bin/sail artisan key:generate
+        run: php artisan key:generate
 
       - name: Wait for MySQL
         run: |
-          until ./vendor/bin/sail exec mysql mysqladmin ping -h mysql --silent; do
-          echo "Waiting for MySQL..."
-          sleep 2
+          for i in {1..15}; do
+            if mysqladmin ping -h127.0.0.1 -ppassword --silent; then
+              echo "MySQL is ready!"
+              break
+            fi
+            echo "Waiting for MySQL..."
+            sleep 2
           done
 
       - name: Run Migrations
-        run: ./vendor/bin/sail artisan migrate
+        run: php artisan migrate --force
 
       - name: Build assets
-        run: ./vendor/bin/sail npm run build
+        run: npm ci && npm run build
 
       - name: Ensure Vite manifest exists
-        run: ./vendor/bin/sail ls -la public/build
+        run: ls -la public/build
 
-      - name: Tests
-        run: ./vendor/bin/sail pest
-
-      - name: Stop Sail
-        if: always()
-        run: ./vendor/bin/sail down -v
+      - name: Run Tests
+        run: vendor/bin/pest
