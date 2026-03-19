@@ -42,6 +42,9 @@ jobs:
       - name: Start Sail
         run: ./vendor/bin/sail up -d --build
 
+      - name: Fix permissions
+        run: ./vendor/bin/sail bash -c "chmod -R 777 storage bootstrap/cache"
+
       - name: Generate Application Key
         run: ./vendor/bin/sail artisan key:generate
 
