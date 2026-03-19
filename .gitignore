@@ -26,4 +26,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-/certs/*
+/certs/
+/go-docker-service/tmp/
+
