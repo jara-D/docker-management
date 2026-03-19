@@ -43,7 +43,7 @@ jobs:
         run: ./vendor/bin/sail up -d --build
 
       - name: Fix permissions
-        run: chmod -R 777 storage bootstrap/cache
+        run: chmod -R 777 storage bootstrap/cache && chmod 777 .env
 
       - name: Generate Application Key
         run: ./vendor/bin/sail artisan key:generate
