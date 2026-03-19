@@ -17,6 +17,8 @@ class ComposeUpReqeust extends FormRequest
 
     public function prepareForValidation(): void
     {
+
+        \Log::info("processing yaml");
         $yaml = $this->yaml;
 
         $yaml = str_replace('\n', "\n", $yaml);
@@ -36,6 +38,7 @@ class ComposeUpReqeust extends FormRequest
         return [
             'projectName' => 'required|string',
             'yaml' => 'required|string',
+            'file' => 'nullable|file'
         ];
     }
 }
