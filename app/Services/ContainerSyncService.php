@@ -8,9 +8,16 @@ class ContainerSyncService
 {
     public function sync(array $data): void
     {
+        $items = $data['result']['data'];
 
-        $data = $data['result']['data'];
-        foreach ($data as $item) {
+        // 1. Collect all container IDs from the incoming data
+        $incomingIds = collect($items)->pluck('Id')->toArray();
+
+        // 2. Delete containers that no longer exist
+        Container::whereNotIn('container_id', $incomingIds)->delete();
+
+        // 3. Update or create existing containers
+        foreach ($items as $item) {
             Container::updateOrCreate(
                 ['container_id' => $item['Id']],
                 [
