@@ -3,6 +3,7 @@ import { router } from '@inertiajs/vue3';
 import playIcon from '/resources/images/play.svg';
 import stopIcon from '/resources/images/stop.svg';
 import placeholderIcon from '/resources/images/placeholder.svg';
+import trashIcon from '/resources/images/trash.svg'
 
 const props = defineProps<{
     id: number;
@@ -17,6 +18,7 @@ const containerName = props.name.includes('/')
 
 const stop = () => router.post(`/containers/${props.container_id}/stop`);
 const start = () => router.post(`/containers/${props.container_id}/start`);
+const deleteContainer = () => router.delete(`/containers/${props.container_id}`);
 </script>
 
 <template>
@@ -41,9 +43,15 @@ const start = () => router.post(`/containers/${props.container_id}/start`);
                 >
                     <img :src="stopIcon" alt="stop" class="h-full w-full" />
                 </button>
+                <button
+                    class="h-8 w-8 bg-red-600 text-sm text-white hover:bg-red-700 md:h-10 md:w-10"
+                    @click="deleteContainer"
+                >
+                    <img :src="trashIcon" alt="stop" class="h-full w-full" />
+                </button>
 
                 <button
-                    v-for="(_, i) in 5"
+                    v-for="(_, i) in 2"
                     :key="i"
                     class="h-8 w-8 bg-blue-600 text-sm text-white hover:bg-blue-700 md:h-10 md:w-10"
                     @click="stop"
