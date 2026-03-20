@@ -35,6 +35,11 @@ class ContainerController extends Controller
         return response()->json($this->adapter->stopContainer($id));
     }
 
+    public function delete(string $id)
+    {
+        return response()->json($this->adapter->removeContainer($id));
+    }
+
 
     public function sync(Request $request)
     {
