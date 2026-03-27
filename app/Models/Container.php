@@ -17,6 +17,7 @@ class Container extends Model
         'labels',
         'network_settings',
         'mounts',
+        'project_id',
     ];
 
     protected $casts = [
@@ -25,4 +26,9 @@ class Container extends Model
         'network_settings' => 'array',
         'mounts' => 'array',
     ];
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class);
+    }
 }

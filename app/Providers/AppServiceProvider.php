@@ -14,7 +14,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-//        $this->app->bind(ContainerInterface::class, DockerAdapter::class);
         $this->app->bind(ContainerInterface::class, GoServiceAdapter::class);
     }
 

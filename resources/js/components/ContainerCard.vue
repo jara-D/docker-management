@@ -3,7 +3,7 @@ import { router } from '@inertiajs/vue3';
 import playIcon from '/resources/images/play.svg';
 import stopIcon from '/resources/images/stop.svg';
 import placeholderIcon from '/resources/images/placeholder.svg';
-import trashIcon from '/resources/images/trash.svg'
+import trashIcon from '/resources/images/trash.svg';
 
 const props = defineProps<{
     id: number;
@@ -12,13 +12,12 @@ const props = defineProps<{
     status: string;
 }>();
 
-const containerName = props.name.includes('/')
-    ? props.name.split('/').pop() || props.name
-    : props.name;
+const containerName = props.name ? props.name.replace(/^\//, '') : 'unknown';
 
 const stop = () => router.post(`/containers/${props.container_id}/stop`);
 const start = () => router.post(`/containers/${props.container_id}/start`);
-const deleteContainer = () => router.delete(`/containers/${props.container_id}`);
+const deleteContainer = () =>
+    router.delete(`/containers/${props.container_id}`);
 </script>
 
 <template>

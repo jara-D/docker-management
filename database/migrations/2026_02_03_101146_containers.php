@@ -11,8 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('projects', function (Blueprint $table): void {
+            $table->id();
+            $table->string('name');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->string('hash');
+            $table->timestamps();
+        });
+
         Schema::create('containers', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('project_id')->constrained('projects')->onDelete('cascade');
             $table->string('container_id')->unique();
             $table->string('name')->nullable();
             $table->string('image')->nullable();
