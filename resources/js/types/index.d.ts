@@ -20,7 +20,6 @@ export interface NavItem {
 export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> =
     T & {
         name: string;
-        quote: { message: string; author: string };
         auth: Auth;
         sidebarOpen: boolean;
         containers: Array<{
@@ -29,6 +28,21 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
             name: string;
             status: string;
         }>;
+        projects: Array<{
+            id: number;
+            name: string;
+            state: string;
+        }>;
+        project: {
+            id: number;
+            name: string;
+            state: string;
+            containers: Array<{
+                id: number;
+                state: string;
+                name: string;
+            }>
+        }
     };
 
 export interface User {

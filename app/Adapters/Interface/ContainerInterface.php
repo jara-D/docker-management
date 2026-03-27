@@ -18,4 +18,6 @@ interface ContainerInterface
     public function listImages(): array;
 
     public function createContainerFromCompose(array $payload): array;
+
+    public function deleteContainerFromCompose(string $projectName): array;
 }

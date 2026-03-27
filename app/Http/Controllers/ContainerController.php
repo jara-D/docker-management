@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Adapters\Interface\ContainerInterface;
-use App\Http\Requests\ComposeUpReqeust;
+use App\Http\Requests\ComposeUpRequest;
 use App\Services\ContainerSyncService;
 use Illuminate\Http\Request;
 
@@ -50,10 +50,17 @@ class ContainerController extends Controller
         return response()->json(['message' => 'Containers synced']);
     }
 
-    public function createContainer(ComposeUpReqeust $request)
+    public function createContainer(ComposeUpRequest $request)
     {
         return response()->json(
             $this->adapter->createContainerFromCompose($request->only(['projectName', 'yaml']))
+        );
+    }
+
+    public function deleteContainer(ComposeUpRequest $request)
+    {
+        return response()->json(
+            $this->adapter->deleteContainerFromCompose($request->only(['projectName', 'yaml']))
         );
     }
 }

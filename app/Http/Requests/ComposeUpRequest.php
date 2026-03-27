@@ -2,9 +2,12 @@
 
 namespace App\Http\Requests;
 
+use Auth;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Symfony\Component\Yaml\Yaml;
 
-class ComposeUpReqeust extends FormRequest
+class ComposeUpRequest extends FormRequest
 {
 
     /**
@@ -15,30 +18,42 @@ class ComposeUpReqeust extends FormRequest
         return true;
     }
 
+
     public function prepareForValidation(): void
     {
-
-        \Log::info("processing yaml");
         $yaml = $this->yaml;
 
+        // Fix escaped newlines
         $yaml = str_replace('\n', "\n", $yaml);
+
+        // Parse YAML
+        $data = Yaml::parse($yaml);
+
+        // Inject user label into every service
+        foreach ($data['services'] as $name => $service) {
+            $data['services'][$name]['labels']['sili.owner'] = Auth::user()->id;
+        }
+
+        // Re-encode YAML
+        $yaml = Yaml::dump($data, 10);
 
         $this->merge([
             'yaml' => $yaml,
         ]);
     }
 
+
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
         return [
             'projectName' => 'required|string',
             'yaml' => 'required|string',
-            'file' => 'nullable|file'
+            'file' => 'nullable|file',
         ];
     }
 }

@@ -36,7 +36,7 @@ class GoServiceAdapter implements ContainerInterface
      * @return array
      * @throws GuzzleException
      */
-    public function RemoveContainerFromCompose(string $projectName): array
+    public function deleteContainerFromCompose(string $projectName): array
     {
         $response = $this->client->post('/compose/down/' . $projectName);
 
