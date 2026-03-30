@@ -28,6 +28,7 @@ Route::controller(ContainerController::class)
 Route::controller(ProjectController::class)
     ->prefix('projects')
     ->name('projects.')
+    ->middleware(['auth', 'verified'])
     ->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('{project}', 'status')->name('status');
