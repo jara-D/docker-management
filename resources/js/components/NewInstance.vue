@@ -28,15 +28,16 @@ const handleDrop = (e: DragEvent) => {
         class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
         @click.self="emit('close')"
     >
-        <Form
+        <form
             @submit.prevent="
-                form.post('/containers/compose/up', {
-                    forceFormData: true,
-                    onSuccess: () => emit('close'),
-                })
-            "
+        form.post('/containers/compose/up', {
+            forceFormData: true,
+            onSuccess: () => emit('close'),
+        })
+    "
             class="relative mx-4 flex w-full max-w-lg flex-col gap-4 rounded-xl border border-gray-700 bg-sidebar p-6 shadow-2xl"
         >
+
             <div class="flex items-center justify-center">
                 <h2 class="text-center text-2xl font-semibold text-white">
                     New Instance
@@ -117,6 +118,6 @@ const handleDrop = (e: DragEvent) => {
                     Create Instance
                 </button>
             </div>
-        </Form>
+        </form>
     </div>
 </template>

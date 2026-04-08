@@ -34,6 +34,7 @@ Route::controller(ProjectController::class)
         Route::get('{project}', 'status')->name('status');
         Route::post('{project}/start', 'start')->name('start');
         Route::post('{project}/stop', 'stop')->name('stop');
+        Route::post('{project}/delete', 'delete')->name('delete');
     });
 
 

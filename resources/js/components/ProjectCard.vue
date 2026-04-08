@@ -25,7 +25,7 @@ const stateClass = computed(() => {
 });
 
 const stop = () => router.post(`/projects/${props.id}/stop`);
-const start = () => router.post(`/containers/${props.id}/start`);
+const start = () => router.post(`/projects/${props.id}/start`);
 </script>
 
 <template>

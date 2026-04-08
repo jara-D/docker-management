@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Adapters\Interface\ContainerInterface;
 use App\Http\Requests\ComposeUpRequest;
+use App\Models\Project;
 use App\Services\ContainerSyncService;
+use Auth;
 use Illuminate\Http\Request;
+use Symfony\Component\Yaml\Yaml;
 
 class ContainerController extends Controller
 {
@@ -48,12 +51,33 @@ class ContainerController extends Controller
         $service->sync($json);
 
         return response()->json(['message' => 'Containers synced']);
-    }
+     }
 
     public function createContainer(ComposeUpRequest $request)
     {
+        $yaml = $request->yaml;
+        $yaml = Yaml::parse($yaml);
+
+        $project = Project::create([
+            'name' => $request->projectName,
+            'user_id' => Auth::id(),
+            'hash' => 'uninitialized',
+        ]);
+
+
+        foreach ($yaml['services'] as $name => $service) {
+            $yaml['services'][$name]['labels']['sili.project_id'] = $project->id;
+        }
+
+        $yaml = Yaml::dump($yaml, 10);
+
+        $payload = [
+            'projectName' => $request->projectName,
+            'yaml' => $yaml,
+        ];
+
         return response()->json(
-            $this->adapter->createContainerFromCompose($request->only(['projectName', 'yaml']))
+            $this->adapter->createContainerFromCompose($payload)
         );
     }
 

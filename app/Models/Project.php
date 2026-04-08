@@ -12,6 +12,8 @@ class Project extends Model
         'name',
         'hash',
         'user_id',
+        'type',
+        'compose_yaml',
     ];
 
     public function containers()

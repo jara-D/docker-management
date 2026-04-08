@@ -4,65 +4,102 @@ namespace App\Services;
 
 use App\Models\Container;
 use App\Models\Project;
-use Auth;
+use Illuminate\Support\Facades\Log;
 
 class ContainerSyncService
 {
     public function sync(array $data): void
     {
-        $items = $data['result']['data'];
+        $items = $data['result']['data'] ?? [];
 
-        $incomingIds = collect($items)->pluck('Id')->toArray();
+        if (empty($items)) {
+            return;
+        }
 
+        // Extract container IDs from Docker
+        $incomingIds = collect($items)->pluck('Id')->filter()->values()->toArray();
+
+        // Delete containers that no longer exist in Docker
         Container::whereNotIn('container_id', $incomingIds)->delete();
 
+        // Group containers by managed/unmanaged/compose/standalone
         $groups = collect($items)->groupBy(function ($item) {
-            return $item['Labels']['com.docker.compose.project'] ?? 'unknown';
+
+            // Managed (Sili)
+            if (isset($item['Labels']['sili.project_id'])) {
+                return 'managed:' . $item['Labels']['sili.project_id'];
+            }
+
+            // Unmanaged Docker Compose
+            if (isset($item['Labels']['com.docker.compose.project'])) {
+                return 'unmanaged:' . $item['Labels']['com.docker.compose.project'];
+            }
+
+            // Standalone unmanaged
+            return 'unmanaged:' . ($item['Names'][0] ?? 'unknown');
         });
 
-        foreach ($groups as $projectName => $containers) {
+        foreach ($groups as $groupKey => $containers) {
 
-            $hashInput = $projectName
-                . implode('', collect($containers)->pluck('Id')->sort()->toArray())
-                . implode('', collect($containers)->pluck('Labels.com.docker.compose.project.working_dir')->sort()->toArray());
+            if (str_starts_with($groupKey, 'managed:')) {
 
-            $projectHash = hash('sha256', $hashInput);
+                $projectId = (int) str_replace('managed:', '', $groupKey);
+                $project = Project::find($projectId);
 
-            $owners = collect($containers)
-                ->pluck('Labels.sili.owner')
-                ->filter()
-                ->unique();
+                if (!$project) continue;
 
-            $projectOwner = $owners->first() ?? auth()->id();
+                $project->update([
+                    'type' => 'managed',
+                    'hash' => $this->computeProjectHash($project->name, $containers),
+                ]);
+            }
 
+            else {
+                // Unmanaged project name
+                $projectName = str_replace('unmanaged:', '', $groupKey);
 
+                $project = Project::firstOrCreate(
+                    ['name' => $projectName],
+                    [
+                        'type' => 'unmanaged',
+                        'user_id' => 1,
+                        'compose_yaml' => null,
+                        'hash' => null,
+                    ]
+                );
+            }
 
-            $project = Project::updateOrCreate(
-                ['hash' => $projectHash],
-                [
-                    'name' => $projectName,
-                    'user_id' => $projectOwner,
-                ]
-            );
-
-
+            // Sync containers
             foreach ($containers as $item) {
                 Container::updateOrCreate(
                     ['container_id' => $item['Id']],
                     [
                         'project_id' => $project->id,
-                        'name' => $item['Names'][0] ?? null,
-                        'image' => $item['Image'],
-                        'image_id' => $item['ImageID'],
-                        'state' => $item['State'],
-                        'status' => $item['Status'],
-                        'ports' => $item['Ports'],
-                        'labels' => $item['Labels'],
+                        'name' => $item['Labels']['com.docker.compose.service'] ?? null,
+                        'image' => $item['Image'] ?? null,
+                        'image_id' => $item['ImageID'] ?? null,
+                        'state' => $item['State'] ?? null,
+                        'status' => $item['Status'] ?? null,
+                        'ports' => $item['Ports'] ?? [],
+                        'labels' => $item['Labels'] ?? [],
                         'network_settings' => $item['NetworkSettings'] ?? null,
                         'mounts' => $item['Mounts'] ?? null,
                     ]
                 );
             }
         }
+    }
+
+
+    /**
+     * Compute a stable hash for a project based on its containers.
+     */
+    private function computeProjectHash(string $projectName, $containers): string
+    {
+        $ids = $containers->pluck('Id')->sort()->implode('');
+        $dirs = $containers->pluck('Labels.com.docker.compose.project.working_dir')->sort()->implode('');
+        $projectIds = $containers->pluck('Labels.sili.project_id')->sort()->implode('');
+
+        return hash('sha256', $projectName . $ids . $dirs . $projectIds);
     }
 }
