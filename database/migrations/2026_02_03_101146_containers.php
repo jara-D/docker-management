@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('hash');
+            $table->string('hash')->nullable();
+            $table->text('compose_yaml')->nullable();
+            $table->enum('type', ['managed', 'unmanaged'])->default('managed');
             $table->timestamps();
         });
 

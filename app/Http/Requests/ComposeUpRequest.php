@@ -26,17 +26,6 @@ class ComposeUpRequest extends FormRequest
         // Fix escaped newlines
         $yaml = str_replace('\n', "\n", $yaml);
 
-        // Parse YAML
-        $data = Yaml::parse($yaml);
-
-        // Inject user label into every service
-        foreach ($data['services'] as $name => $service) {
-            $data['services'][$name]['labels']['sili.owner'] = Auth::user()->id;
-        }
-
-        // Re-encode YAML
-        $yaml = Yaml::dump($data, 10);
-
         $this->merge([
             'yaml' => $yaml,
         ]);

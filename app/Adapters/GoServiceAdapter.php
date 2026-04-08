@@ -66,6 +66,7 @@ class GoServiceAdapter implements ContainerInterface
     /**
      * @param string $id
      * @return array
+     * @throws GuzzleException
      */
     public function stopContainer(string $id): array
     {
