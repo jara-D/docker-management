@@ -62,6 +62,7 @@ class ContainerController extends Controller
             'name' => $request->projectName,
             'user_id' => Auth::id(),
             'hash' => 'uninitialized',
+            'compose_yaml' => $request->yaml,
         ]);
 
 
