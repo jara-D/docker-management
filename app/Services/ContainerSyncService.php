@@ -90,6 +90,38 @@ class ContainerSyncService
         }
     }
 
+    public function projectSync(string $projectId, array $dockerContainers): void
+    {
+        // Extract the real container list
+        $dockerContainers = $dockerContainers['result']['data'] ?? [];
+
+        // Load project with containers
+        $project = Project::with('containers')->find($projectId);
+
+        if (!$project) {
+            return;
+        }
+
+        // Index docker data by container ID
+        $dockerIndex = collect($dockerContainers)->keyBy('Id');
+
+        foreach ($project->containers as $container) {
+
+            if (!$dockerIndex->has($container->container_id)) {
+                Log::info("No docker data for {$container->container_id}");
+                continue;
+            }
+
+            $data = $dockerIndex[$container->container_id];
+
+            $container->update([
+                'state'  => $data['State']  ?? $container->state,
+                'status' => $data['Status'] ?? $container->status,
+            ]);
+        }
+    }
+
+
 
     /**
      * Compute a stable hash for a project based on its containers.

@@ -4,22 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Adapters\GoServiceAdapter;
 use App\Models\Project;
+use App\Services\ContainerSyncService;
+use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
+use Inertia\Response;
 
 class ProjectController extends Controller
 {
-    public function index()
+    public function __construct(
+        protected GoServiceAdapter $go
+    ) {}
+
+    public function index(): Response
     {
+        $projects = Project::with([
+            'containers:id,project_id,state'
+        ])->get(['id', 'name', 'type']);
+
         return Inertia::render('Projects', [
-            'projects' => Project::with([
-                'containers:project_id,state'
-            ])->get(['id', 'name']),
+            'projects' => $projects,
         ]);
     }
-    public function status(Project $project)
+
+    public function status(Project $project): Response
     {
         $project->load([
-            'containers:id,project_id,name,state'
+            'containers:id,project_id,name,state,image'
         ]);
 
         return Inertia::render('Project/Status', [
@@ -27,28 +38,52 @@ class ProjectController extends Controller
         ]);
     }
 
-
-    public function start(Project $project)
+    public function start(Project $project): RedirectResponse
     {
+        $project->load('containers:id,project_id,container_id');
+
         foreach ($project->containers as $container) {
-            app(GoServiceAdapter::class)->startContainer($container->container_id);
+            $this->go->startContainer($container->container_id);
         }
 
-        return back();
+        $dockerData = $this->go->listContainers(); // or inspect each container
+
+        app(ContainerSyncService::class)->projectSync(
+            $project->id,
+            $dockerData
+        );
+
+        return back()->with('success', 'Project started');
     }
 
-    public function stop(Project $project)
+    /**
+     * @throws GuzzleException
+     */
+    public function stop(Project $project): RedirectResponse
     {
+        $project->load('containers:id,project_id,container_id');
+
         foreach ($project->containers as $container) {
-            app(GoServiceAdapter::class)->stopContainer($container->container_id);
+            $this->go->stopContainer($container->container_id);
         }
 
-        return back();
+        $dockerData = $this->go->listContainers(); // or inspect each container
+
+        app(ContainerSyncService::class)->projectSync(
+            $project->id,
+            $dockerData
+        );
+
+
+        return back()->with('success', 'Project stopped');
     }
 
-    public function delete(Project $project)
+    public function delete(Project $project): RedirectResponse
     {
         $project->delete();
-    }
 
+        return redirect()
+            ->route('projects.index')
+            ->with('success', 'Project deleted');
+    }
 }
