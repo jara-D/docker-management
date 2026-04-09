@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Log;
 
 class Project extends Model
 {
@@ -23,6 +24,10 @@ class Project extends Model
 
     public function getStateAttribute(): string
     {
+        if ($this->containers->count() == 0) {
+            return 'stopped';
+        }
+
         if ($this->containers->every(fn ($c) => $c->state === 'running')) {
             return 'healthy';
         }
