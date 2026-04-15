@@ -3,7 +3,7 @@ services:
         image: traefik:v3.6
         container_name: traefik
         networks:
-            - proxy
+            - traefik_proxy
         ports:
             - "80:80"
             - "443:443"
@@ -18,15 +18,24 @@ services:
             - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
             - "--entrypoints.websecure.address=:443"
             - "--entrypoints.websecure.http.tls=true"
-            - "--providers.file.filename=/dynamic/tls.yaml"
+
+            # Only watch containers on traefik_proxy
             - "--providers.docker=true"
             - "--providers.docker.exposedbydefault=false"
-            - "--providers.docker.network=proxy"
+            - "--providers.docker.network=traefik_proxy"
+
+            # Static TLS config
+            - "--providers.file.filename=/dynamic/tls.yaml"
+
+            # Dashboard
             - "--api.dashboard=true"
             - "--api.insecure=false"
+
+            # Logging
             - "--log.level=INFO"
             - "--accesslog=true"
             - "--metrics.prometheus=true"
+
         labels:
             - "traefik.enable=true"
             - "traefik.http.routers.dashboard.rule=Host(`traefik.sili.localhost`)"
@@ -52,8 +61,8 @@ services:
         volumes:
             - '.:/var/www/html'
         networks:
-            - sail
-            - proxy
+            - app_network
+            - traefik_proxy
         depends_on:
             - mysql
         ports:
@@ -81,7 +90,7 @@ services:
             - 'sail-mysql:/var/lib/mysql'
             - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
         networks:
-            - sail
+            - app_network
         healthcheck:
             test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
             retries: 3
@@ -97,15 +106,17 @@ services:
             - ./go-docker-service:/app
             - /var/run/docker.sock:/var/run/docker.sock
         networks:
-            - sail
+            - app_network
         depends_on:
             - laravel.test
 
 networks:
-    sail:
+    traefik_proxy:
+        name: traefik_proxy
         driver: bridge
-    proxy:
-        name: proxy
+
+    app_network:
+        name: app_network
         driver: bridge
 
 volumes:

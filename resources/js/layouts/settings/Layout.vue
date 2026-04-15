@@ -9,6 +9,9 @@ import { show } from '@/routes/two-factor';
 import { edit as editPassword } from '@/routes/user-password';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
+import Notifications from '@/components/Notifications.vue';
+
+
 
 const sidebarNavItems: NavItem[] = [
     {
@@ -69,4 +72,5 @@ const currentPath = typeof window !== undefined ? window.location.pathname : '';
             </div>
         </div>
     </div>
+    <notifications />
 </template>

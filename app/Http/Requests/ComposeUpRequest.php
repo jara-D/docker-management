@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidComposeYaml;
 use Auth;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -21,16 +22,12 @@ class ComposeUpRequest extends FormRequest
 
     public function prepareForValidation(): void
     {
-        $yaml = $this->yaml;
-
-        // Fix escaped newlines
-        $yaml = str_replace('\n', "\n", $yaml);
-
-        $this->merge([
-            'yaml' => $yaml,
-        ]);
+        if (is_string($this->yaml)) {
+            $this->merge([
+                'yaml' => str_replace('\n', "\n", $this->yaml),
+            ]);
+        }
     }
-
 
     /**
      * Get the validation rules that apply to the request.
@@ -41,7 +38,7 @@ class ComposeUpRequest extends FormRequest
     {
         return [
             'projectName' => 'required|string',
-            'yaml' => 'required|string',
+            'yaml' => ['required', 'string', new ValidComposeYaml],
             'file' => 'nullable|file',
         ];
     }

@@ -28,6 +28,10 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
             name: string;
             status: string;
         }>;
+        flash: {
+            message: string;
+            type: string;
+        },
         projects: Array<{
             id: number;
             name: string;
