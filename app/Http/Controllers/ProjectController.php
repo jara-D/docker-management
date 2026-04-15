@@ -53,7 +53,10 @@ class ProjectController extends Controller
             $dockerData
         );
 
-        return back()->with('success', 'Project started');
+        return back()->with('flash', [
+            'message' => 'Projects started',
+            'type' => 'success',
+        ]);
     }
 
     /**
@@ -74,8 +77,10 @@ class ProjectController extends Controller
             $dockerData
         );
 
-
-        return back()->with('success', 'Project stopped');
+        return back()->with('flash', [
+            'message' => 'Projects stopped',
+            'type' => 'success',
+        ]);
     }
 
     public function delete(Project $project): RedirectResponse

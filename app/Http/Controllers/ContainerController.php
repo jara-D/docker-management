@@ -55,8 +55,7 @@ class ContainerController extends Controller
 
     public function createContainer(ComposeUpRequest $request)
     {
-        $yaml = $request->yaml;
-        $yaml = Yaml::parse($yaml);
+        $yaml = Yaml::parse($request->yaml);
 
         $project = Project::create([
             'name' => $request->projectName,
@@ -65,7 +64,7 @@ class ContainerController extends Controller
             'compose_yaml' => $request->yaml,
         ]);
 
-
+        // Put the id of the project into the container for identification
         foreach ($yaml['services'] as $name => $service) {
             $yaml['services'][$name]['labels']['sili.project_id'] = $project->id;
         }
