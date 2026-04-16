@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
-import { usePage } from '@inertiajs/vue3';
 import Notifications from '@/components/Notifications.vue';
 
 const page = usePage();

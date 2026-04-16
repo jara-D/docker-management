@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Adapters\GoServiceAdapter;
 use App\Models\Project;
 use App\Services\ContainerSyncService;
+use Auth;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -18,9 +19,12 @@ class ProjectController extends Controller
 
     public function index(): Response
     {
-        $projects = Project::with([
-            'containers:id,project_id,state'
-        ])->get(['id', 'name', 'type']);
+        $projects = Auth::user()
+            ->projects()
+            ->with(['containers:id,project_id,state'])
+            ->get(['id', 'name', 'type'])
+            ->makeHidden('containers');
+
 
         return Inertia::render('Projects', [
             'projects' => $projects,
@@ -42,22 +46,39 @@ class ProjectController extends Controller
     {
         $project->load('containers:id,project_id,container_id');
 
+        $failures = [];
+
         foreach ($project->containers as $container) {
-            $this->go->startContainer($container->container_id);
+            $response = $this->go->startContainer($container->container_id);
+            $decoded = json_decode(json_encode($response));
+
+            if (!isset($decoded->result->state) || $decoded->result->state !== 'started') {
+                $failures[] = $container->container_id;
+            }
         }
 
-        $dockerData = $this->go->listContainers(); // or inspect each container
+        $dockerData = $this->go->listContainers();
 
         app(ContainerSyncService::class)->projectSync(
             $project->id,
             $dockerData
         );
 
+        if (!empty($failures)) {
+            return back()->with('flash', [
+                'title' => 'Failed',
+                'message' => 'Some containers failed to start',
+                'type' => 'error',
+            ]);
+        }
+
         return back()->with('flash', [
-            'message' => 'Projects started',
+            'title' => 'Started',
+            'message' => 'All project containers started successfully',
             'type' => 'success',
         ]);
     }
+
 
     /**
      * @throws GuzzleException
@@ -67,7 +88,12 @@ class ProjectController extends Controller
         $project->load('containers:id,project_id,container_id');
 
         foreach ($project->containers as $container) {
-            $this->go->stopContainer($container->container_id);
+            $response = $this->go->stopContainer($container->container_id);
+            $decoded = json_decode(json_encode($response));
+
+            if (!isset($decoded->result->state) || $decoded->result->state !== 'started') {
+                $failures[] = $container->container_id;
+            }
         }
 
         $dockerData = $this->go->listContainers(); // or inspect each container
@@ -77,8 +103,17 @@ class ProjectController extends Controller
             $dockerData
         );
 
+        if (!empty($failures)) {
+            return back()->with('flash', [
+                'title' => 'Failed',
+                'message' => 'Some containers failed to stop',
+                'type' => 'error',
+            ]);
+        }
+
         return back()->with('flash', [
-            'message' => 'Projects stopped',
+            'title' => 'Stopped',
+            'message' => 'All project containers stopped successfully',
             'type' => 'success',
         ]);
     }
@@ -89,6 +124,10 @@ class ProjectController extends Controller
 
         return redirect()
             ->route('projects.index')
-            ->with('success', 'Project deleted');
+            ->with('flash', [
+                'title' => 'Deleted',
+                'message' => 'Project deleted',
+                'type' => 'success',
+            ]);
     }
 }

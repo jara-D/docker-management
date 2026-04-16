@@ -24,7 +24,12 @@ import { Notification, NotificationGroup } from 'notiwind';
                         :key="notification.id"
                     >
                         <div
-                            class="flex w-12 items-center justify-center bg-green-500"
+                            class="flex w-12 items-center justify-center"
+                            :class="{
+                                'bg-green-500': notification.type === 'success',
+                                'bg-gray-500': notification.type === 'info',
+                                'bg-red-500': notification.type === 'error',
+                            }"
                         >
                             <svg
                                 class="h-6 w-6 fill-current text-white"
@@ -39,9 +44,19 @@ import { Notification, NotificationGroup } from 'notiwind';
 
                         <div class="-mx-3 px-4 py-2">
                             <div class="mx-3">
-                                <span class="font-semibold text-green-500">{{
-                                    notification.title
-                                }}</span>
+                                <span
+                                    class="font-semibold text-green-500"
+                                    :class="{
+                                        'text-green-500':
+                                            notification.type === 'success',
+                                        'text-gray-500':
+                                            notification.type === 'info',
+                                        'text-red-500':
+                                            notification.type === 'error',
+                                    }"
+                                    >
+                                    {{ notification.title }}
+                                </span>
                                 <p class="text-sm text-gray-600">
                                     {{ notification.text }}
                                 </p>

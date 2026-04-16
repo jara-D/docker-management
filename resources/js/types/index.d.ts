@@ -29,6 +29,7 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
             status: string;
         }>;
         flash: {
+            title: string;
             message: string;
             type: string;
         },
@@ -41,11 +42,6 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
             id: number;
             name: string;
             state: string;
-            containers: Array<{
-                id: number;
-                state: string;
-                name: string;
-            }>
         }
     };
 
