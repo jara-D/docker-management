@@ -9,7 +9,8 @@ export default () => {
             notify(
                 {
                     group: 'foo',
-                    title: flash.type === 'success' ? 'Success' : 'Info',
+                    title: flash.title,
+                    type:  flash.type,
                     text: flash.message,
                 },
                 4000,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/vue3';
@@ -11,7 +11,7 @@ import projectsRoute from '@/routes/projects';
 const showModal = ref(false);
 
 const page = usePage();
-const projects = page.props.projects;
+const projects = computed(() => page.props.projects);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -24,10 +24,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 <template>
     <Head title="Projects" />
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div
-            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto"
-        >
-
+        <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto">
             <button
                 class="mt-4 w-fit rounded bg-blue-600 px-3 py-1 text-white"
                 @click="router.post(`/containers/sync`)"

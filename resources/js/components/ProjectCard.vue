@@ -48,7 +48,6 @@ const start = () => router.post(`/projects/${props.id}/start`);
                 class="h-8 w-8 rounded-lg bg-blue-600 hover:bg-blue-700 md:h-10 md:w-10"
             >
                 <img :src="settingsIcon" alt="icon" class="h-full w-full p-1" />
-
             </Link>
         </div>
 
