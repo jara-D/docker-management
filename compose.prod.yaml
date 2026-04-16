@@ -84,6 +84,8 @@ services:
       timeout: 5s
 
   go-service:
+    ports:
+      - "8080:8080"
     container_name: go-service
     build:
       context: ./go-docker-service
