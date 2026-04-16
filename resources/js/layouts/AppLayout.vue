@@ -3,6 +3,9 @@ import AppLayout from '@/layouts/app/AppSidebarLayout.vue';
 import type { BreadcrumbItemType } from '@/types';
 import Notifications from '@/components/Notifications.vue';
 
+const page = usePage();
+console.log(page.props)
+;
 interface Props {
     breadcrumbs?: BreadcrumbItemType[];
 }
