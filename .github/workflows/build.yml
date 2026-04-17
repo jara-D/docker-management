@@ -22,7 +22,7 @@ jobs:
           push: true
           tags: |
             ghcr.io/jara-d/sili-laravel:latest
-            ghcr.io/jara-d/sili-laravel:${{github.rsa}}
+            ghcr.io/jara-d/sili-laravel:${{github.sha}}
 
 
       - name: Build Go service image
@@ -33,4 +33,4 @@ jobs:
           push: true
           tags: |
             ghcr.io/jara-d/sili-go:latest
-            ghcr.io/jara-d/sili-go:${{github.rsa}}
+            ghcr.io/jara-d/sili-go:${{github.sha}}
