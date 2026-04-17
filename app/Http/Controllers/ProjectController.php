@@ -92,14 +92,12 @@ class ProjectController extends Controller
             $response = $this->go->stopContainer($container->container_id);
             $decoded = json_decode(json_encode($response));
 
-            if (!isset($decoded->result->state) || $decoded->result->state !== 'started') {
+            if (!isset($decoded->result->state) || $decoded->result->state !== 'exited') {
                 $failures[] = $container->container_id;
             }
         }
 
-        Log::info(json_encode($failures));
-
-        $dockerData = $this->go->listContainers(); // or inspect each container
+        $dockerData = $this->go->listContainers();
 
         app(ContainerSyncService::class)->projectSync(
             $project->id,
