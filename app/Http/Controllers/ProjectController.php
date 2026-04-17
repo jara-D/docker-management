@@ -47,7 +47,6 @@ class ProjectController extends Controller
         $project->load('containers:id,project_id,container_id');
 
         $failures = [];
-
         foreach ($project->containers as $container) {
             $response = $this->go->startContainer($container->container_id);
             $decoded = json_decode(json_encode($response));
@@ -87,6 +86,7 @@ class ProjectController extends Controller
     {
         $project->load('containers:id,project_id,container_id');
 
+        $failures =[];
         foreach ($project->containers as $container) {
             $response = $this->go->stopContainer($container->container_id);
             $decoded = json_decode(json_encode($response));
