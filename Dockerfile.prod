@@ -1,0 +1,27 @@
+FROM php:8.4-fpm
+
+# System deps
+RUN apt-get update && apt-get install -y \
+    git unzip libpq-dev libzip-dev libpng-dev libonig-dev libxml2-dev \
+    && docker-php-ext-install pdo pdo_mysql zip
+
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+# Fix git safe directory issue
+RUN git config --global --add safe.directory /var/www/html
+
+# Copy app
+COPY . .
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
+
+# Cache Laravel config
+RUN php artisan config:cache
+RUN php artisan route:cache
+RUN php artisan view:cache
+
+CMD ["php-fpm"]
