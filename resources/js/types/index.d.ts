@@ -17,14 +17,33 @@ export interface NavItem {
     isActive?: boolean;
 }
 
-export type AppPageProps<
-    T extends Record<string, unknown> = Record<string, unknown>,
-> = T & {
-    name: string;
-    quote: { message: string; author: string };
-    auth: Auth;
-    sidebarOpen: boolean;
-};
+export type AppPageProps<T extends Record<string, unknown> = Record<string, unknown>> =
+    T & {
+        name: string;
+        auth: Auth;
+        sidebarOpen: boolean;
+        containers: Array<{
+            id: number;
+            container_id: string;
+            name: string;
+            status: string;
+        }>;
+        flash: {
+            title: string;
+            message: string;
+            type: string;
+        },
+        projects: Array<{
+            id: number;
+            name: string;
+            state: string;
+        }>;
+        project: {
+            id: number;
+            name: string;
+            state: string;
+        }
+    };
 
 export interface User {
     id: number;
