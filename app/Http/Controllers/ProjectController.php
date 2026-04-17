@@ -10,6 +10,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Log;
 
 class ProjectController extends Controller
 {
@@ -95,6 +96,8 @@ class ProjectController extends Controller
                 $failures[] = $container->container_id;
             }
         }
+
+        Log::info(json_encode($failures));
 
         $dockerData = $this->go->listContainers(); // or inspect each container
 
