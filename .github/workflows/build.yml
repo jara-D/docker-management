@@ -21,8 +21,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
+          password: ${{ secrets.PAT }}
 
       - name: Build Laravel image
         uses: docker/build-push-action@v5
@@ -35,8 +34,6 @@ jobs:
             ghcr.io/jara-d/sili-laravel:${{ github.ref_name }}
             ${{ github.ref_name == 'main' && 'ghcr.io/jara-d/sili-laravel:latest' }}
 
-
-
       - name: Build Go service image
         uses: docker/build-push-action@v5
         with:
@@ -47,4 +44,3 @@ jobs:
             ghcr.io/jara-d/sili-go:${{ github.sha }}
             ghcr.io/jara-d/sili-go:${{ github.ref_name }}
             ${{ github.ref_name == 'main' && 'ghcr.io/jara-d/sili-go:latest' }}
-
