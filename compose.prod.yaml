@@ -2,6 +2,7 @@ services:
   traefik:
     image: traefik:v3.6.1
     container_name: traefik
+    restart: always
     networks:
       - proxy
     ports:
@@ -17,43 +18,46 @@ services:
       - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
       - "--entrypoints.websecure.address=:443"
       - "--entrypoints.websecure.http.tls=true"
+
+      # Providers
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
       - "--providers.docker.network=proxy"
+
+      # Dashboard
       - "--api.dashboard=true"
       - "--api.insecure=false"
+
+      # Logging
       - "--log.level=INFO"
       - "--accesslog=true"
       - "--metrics.prometheus=true"
 
-      # Let's Encrypt Config
+      # Let's Encrypt
       - "--certificatesresolvers.resolver.acme.tlschallenge=true"
       - "--certificatesresolvers.resolver.acme.email=jaradoornbos1@gmail.com"
       - "--certificatesresolvers.resolver.acme.storage=/letsencrypt/acme.json"
 
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`treafik.checkpointalfa.nl`)"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.checkpointalfa.nl`)"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.service=api@internal"
+      - "traefik.http.routers.dashboard.tls.certresolver=resolver"
 
-  laravel.test:
-    build:
-      context: './vendor/laravel/sail/runtimes/8.5'
-      dockerfile: Dockerfile
-      args:
-        WWWGROUP: '${WWWGROUP}'
-    image: 'sail-8.5/app'
-    extra_hosts:
-      - 'host.docker.internal:host-gateway'
+  laravel:
+    image: ghcr.io/jara-d/docker-management-laravel:latest
+    restart: always
     environment:
-      WWWUSER: '${WWWUSER}'
-      LARAVEL_SAIL: 1
-    volumes:
-      - '.:/var/www/html'
+      APP_ENV: production
+      APP_DEBUG: false
+      DB_HOST: mysql
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
     networks:
-      - sail
       - proxy
+      - internal
     depends_on:
       - mysql
     labels:
@@ -65,47 +69,36 @@ services:
       - "traefik.http.services.laravel.loadbalancer.server.port=80"
 
   mysql:
-    image: 'mysql:8.4'
+    image: mysql:8.4
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
-      MYSQL_ROOT_HOST: '%'
-      MYSQL_DATABASE: '${DB_DATABASE}'
-      MYSQL_USER: '${DB_USERNAME}'
-      MYSQL_PASSWORD: '${DB_PASSWORD}'
-      MYSQL_ALLOW_EMPTY_PASSWORD: 1
-      MYSQL_EXTRA_OPTIONS: '${MYSQL_EXTRA_OPTIONS:-}'
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - 'sail-mysql:/var/lib/mysql'
+      - mysql-data:/var/lib/mysql
     networks:
-      - sail
+      - internal
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
-      retries: 3
+      retries: 5
       timeout: 5s
 
   go-service:
-    ports:
-      - "8080:8080"
-    container_name: go-service
-    build:
-      context: ./go-docker-service
-      dockerfile: Dockerfile
-      target: dev
-    volumes:
-      - ./go-docker-service:/app
-      - /var/run/docker.sock:/var/run/docker.sock
+    image: ghcr.io/jara-d/docker-management-go-service:latest
+    restart: always
     networks:
-      - sail
+      - internal
     depends_on:
-      - laravel.test
+      - laravel
 
 networks:
-  sail:
-    driver: bridge
   proxy:
-    name: proxy
+    driver: bridge
+  internal:
     driver: bridge
 
 volumes:
-  sail-mysql:
+  mysql-data:
     driver: local
