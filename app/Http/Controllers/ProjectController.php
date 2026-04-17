@@ -92,7 +92,7 @@ class ProjectController extends Controller
             $response = $this->go->stopContainer($container->container_id);
             $decoded = json_decode(json_encode($response));
 
-            if (!isset($decoded->result->state) || $decoded->result->state !== 'exited') {
+            if (!isset($decoded->result->state) || $decoded->result->state !== 'stopped') {
                 $failures[] = $container->container_id;
             }
         }
