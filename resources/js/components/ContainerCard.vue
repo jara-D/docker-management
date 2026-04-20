@@ -26,7 +26,7 @@ const start = () => router.post(`/containers/${props.container_id}/start`);
                 {{ containerName }}
             </div>
         </div>
-
+        
         <div class="space-y-2 mt-auto">
             <p class="text-xs md:text-sm text-gray-400">Status: {{ status }}</p>
 
