@@ -1,6 +1,4 @@
 # --- Build stage ---
-LABEL org.opencontainers.image.source=https://github.com/jara-d/sili
-
 FROM golang:1.25-alpine AS builder
 
 WORKDIR /src
