@@ -32,6 +32,8 @@ jobs:
           tags: |
             ghcr.io/jara-d/sili-laravel:${{ github.sha }}
             ghcr.io/jara-d/sili-laravel:${{ github.ref_name }}
+            ${{ github.ref_name == 'main' && 'ghcr.io/jara-d/sili-laravel:latest' || '' }}
+
 
       - name: Build Go service image
         uses: docker/build-push-action@v5
@@ -42,3 +44,4 @@ jobs:
           tags: |
             ghcr.io/jara-d/sili-go:${{ github.sha }}
             ghcr.io/jara-d/sili-go:${{ github.ref_name }}
+            ${{ github.ref_name == 'main' && 'ghcr.io/jara-d/sili-go:latest' || '' }}
