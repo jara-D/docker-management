@@ -8,6 +8,8 @@ class ContainerSyncService
 {
     public function sync(array $data): void
     {
+
+        $data = $data['result']['data'];
         foreach ($data as $item) {
             Container::updateOrCreate(
                 ['container_id' => $item['Id']],
