@@ -40,7 +40,7 @@ services:
 
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.dashboard.rule=Host(`traefik.checkpointalfa.nl`)"
+      - "traefik.http.routers.dashboard.rule=Host(`traefik.${DOMAIN}`)"
       - "traefik.http.routers.dashboard.entrypoints=websecure"
       - "traefik.http.routers.dashboard.service=api@internal"
       - "traefik.http.routers.dashboard.tls.certresolver=resolver"
@@ -62,7 +62,7 @@ services:
       - mysql
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.laravel.rule=Host(`checkpointalfa.nl`)"
+      - "traefik.http.routers.laravel.rule=Host(`${DOMAIN}`)"
       - "traefik.http.routers.laravel.entrypoints=websecure"
       - "traefik.http.routers.laravel.tls=true"
       - "traefik.http.routers.laravel.tls.certresolver=resolver"
