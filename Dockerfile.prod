@@ -1,4 +1,4 @@
-LABEL org.opencontainers.image.source=https://github.com/jar-d/sili
+LABEL org.opencontainers.image.source=https://github.com/jara-d/sili
 
 FROM php:8.4-fpm
 
