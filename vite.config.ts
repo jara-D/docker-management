@@ -24,15 +24,11 @@ export default defineConfig({
             },
         }),
     ],
-    // server: {
-    //     host: '0.0.0.0',   // allow connections from Docker/WSL
-    //     port: 5173,        // match your exposed port
-    //     hmr: {
-    //         host: 'localhost', // ensures browser connects correctly
-    //     },
-    //     watch: {
-    //         usePolling: true,  // fixes file change detection in WSL2/Docker
-    //         interval: 100,     // polling interval in ms
-    //     },
-    // },
+    server: {
+        host: '0.0.0.0', // allow connections from Docker/WSL
+        port: 5173, // match your exposed port
+        hmr: {
+            host: 'localhost', // ensures browser connects correctly
+        },
+    },
 });

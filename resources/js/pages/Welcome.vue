@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { dashboard, login, register } from '@/routes';
+import { login, register } from '@/routes';
 import { Head, Link } from '@inertiajs/vue3';
+import projects from '@/routes/projects';
 
 withDefaults(
     defineProps<{
@@ -26,10 +27,10 @@ withDefaults(
             <nav class="flex items-center justify-end gap-4">
                 <Link
                     v-if="$page.props.auth.user"
-                    :href="dashboard()"
+                    :href="projects.index()"
                     class="inline-block rounded-sm border border-[#19140035] px-5 py-1.5 text-sm leading-normal text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
                 >
-                    Dashboard
+                    Projects
                 </Link>
                 <template v-else>
                     <Link

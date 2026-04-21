@@ -2,9 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\ValidComposeYaml;
+use Auth;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Symfony\Component\Yaml\Yaml;
 
-class ComposeUpReqeust extends FormRequest
+class ComposeUpRequest extends FormRequest
 {
 
     /**
@@ -15,30 +19,27 @@ class ComposeUpReqeust extends FormRequest
         return true;
     }
 
+
     public function prepareForValidation(): void
     {
-
-        \Log::info("processing yaml");
-        $yaml = $this->yaml;
-
-        $yaml = str_replace('\n', "\n", $yaml);
-
-        $this->merge([
-            'yaml' => $yaml,
-        ]);
+        if (is_string($this->yaml)) {
+            $this->merge([
+                'yaml' => str_replace('\n', "\n", $this->yaml),
+            ]);
+        }
     }
 
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
         return [
             'projectName' => 'required|string',
-            'yaml' => 'required|string',
-            'file' => 'nullable|file'
+            'yaml' => ['required', 'string', new ValidComposeYaml],
+            'file' => 'nullable|file',
         ];
     }
 }

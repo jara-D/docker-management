@@ -5,34 +5,41 @@ services:
         networks:
             - proxy
         ports:
-            - "80:80"
-            - "443:443"
+            - '80:80'
+            - '443:443'
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro
             - ./certs:/certs:ro
             - ./dynamic:/dynamic:ro
         command:
-            - "--entrypoints.web.address=:80"
-            - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
-            - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
-            - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
-            - "--entrypoints.websecure.address=:443"
-            - "--entrypoints.websecure.http.tls=true"
-            - "--providers.file.filename=/dynamic/tls.yaml"
-            - "--providers.docker=true"
-            - "--providers.docker.exposedbydefault=false"
-            - "--providers.docker.network=proxy"
-            - "--api.dashboard=true"
-            - "--api.insecure=false"
-            - "--log.level=INFO"
-            - "--accesslog=true"
-            - "--metrics.prometheus=true"
+            - '--entrypoints.web.address=:80'
+            - '--entrypoints.web.http.redirections.entrypoint.to=websecure'
+            - '--entrypoints.web.http.redirections.entrypoint.scheme=https'
+            - '--entrypoints.web.http.redirections.entrypoint.permanent=true'
+            - '--entrypoints.websecure.address=:443'
+            - '--entrypoints.websecure.http.tls=true'
+
+            # Providers
+            - '--providers.docker=true'
+            - '--providers.docker.exposedbydefault=false'
+            - '--providers.docker.network=proxy'
+            - '--providers.file.filename=/dynamic/tls.yaml'
+
+            # Dashboard
+            - '--api.dashboard=true'
+            - '--api.insecure=false'
+
+            # Logging
+            - '--log.level=INFO'
+            - '--accesslog=true'
+            - '--metrics.prometheus=true'
+
         labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.dashboard.rule=Host(`traefik.sili.localhost`)"
-            - "traefik.http.routers.dashboard.entrypoints=websecure"
-            - "traefik.http.routers.dashboard.service=api@internal"
-            - "traefik.http.routers.dashboard.tls=true"
+            - 'traefik.enable=true'
+            - 'traefik.http.routers.dashboard.rule=Host(`traefik.sili.localhost`)'
+            - 'traefik.http.routers.dashboard.entrypoints=websecure'
+            - 'traefik.http.routers.dashboard.service=api@internal'
+            - 'traefik.http.routers.dashboard.tls=true'
 
     laravel.test:
         build:
@@ -59,16 +66,14 @@ services:
         ports:
             - '${VITE_PORT:-5173}:${VITE_PORT:-5173}'
         labels:
-            - "traefik.enable=true"
-            - "traefik.http.routers.laravel.rule=Host(`dashboard.sili.localhost`)"
-            - "traefik.http.routers.laravel.entrypoints=websecure"
-            - "traefik.http.routers.laravel.tls=true"
-            - "traefik.http.services.laravel.loadbalancer.server.port=80"
+            - 'traefik.enable=true'
+            - 'traefik.http.routers.laravel.rule=Host(`dashboard.sili.localhost`)'
+            - 'traefik.http.routers.laravel.entrypoints=websecure'
+            - 'traefik.http.routers.laravel.tls=true'
+            - 'traefik.http.services.laravel.loadbalancer.server.port=80'
 
     mysql:
-        image: 'mysql:8.4'
-        ports:
-            - '${FORWARD_DB_PORT:-3306}:3306'
+        image: mysql:8.4
         environment:
             MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
             MYSQL_ROOT_HOST: '%'
@@ -76,14 +81,12 @@ services:
             MYSQL_USER: '${DB_USERNAME}'
             MYSQL_PASSWORD: '${DB_PASSWORD}'
             MYSQL_ALLOW_EMPTY_PASSWORD: 1
-            MYSQL_EXTRA_OPTIONS: '${MYSQL_EXTRA_OPTIONS:-}'
         volumes:
-            - 'sail-mysql:/var/lib/mysql'
-            - './vendor/laravel/sail/database/mysql/create-testing-database.sh:/docker-entrypoint-initdb.d/10-create-testing-database.sh'
+            - sail-mysql:/var/lib/mysql
         networks:
             - sail
         healthcheck:
-            test: ["CMD", "mysqladmin", "ping", "-p${DB_PASSWORD}"]
+            test: ['CMD', 'mysqladmin', 'ping', '-p${DB_PASSWORD}']
             retries: 3
             timeout: 5s
 

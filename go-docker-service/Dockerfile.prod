@@ -1,0 +1,21 @@
+# --- Build stage ---
+FROM golang:1.25-alpine AS builder
+
+WORKDIR /src
+
+RUN apk add --no-cache gcc g++ libc-dev
+
+ENV CGO_ENABLED=1 GOOS=linux GOARCH=amd64
+
+COPY . .
+RUN go build -o server ./cmd/server
+
+# --- Production stage ---
+FROM alpine:3.19
+
+WORKDIR /app
+
+COPY --from=builder /src/server /app/server
+
+EXPOSE 8080
+CMD ["/app/server"]

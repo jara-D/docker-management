@@ -36,7 +36,7 @@ class GoServiceAdapter implements ContainerInterface
      * @return array
      * @throws GuzzleException
      */
-    public function RemoveContainerFromCompose(string $projectName): array
+    public function deleteContainerFromCompose(string $projectName): array
     {
         $response = $this->client->post('/compose/down/' . $projectName);
 
@@ -66,6 +66,7 @@ class GoServiceAdapter implements ContainerInterface
     /**
      * @param string $id
      * @return array
+     * @throws GuzzleException
      */
     public function stopContainer(string $id): array
     {
@@ -76,10 +77,12 @@ class GoServiceAdapter implements ContainerInterface
     /**
      * @param string $id
      * @return array
+     * @throws GuzzleException
      */
     public function removeContainer(string $id): array
     {
-        // TODO: Implement removeContainer() method.
+        $response = $this->client->delete('/container/' . $id);
+        return json_decode($response->getBody()->getContents(), true);
     }
 
     /**
