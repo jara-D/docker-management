@@ -10,19 +10,12 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { LayoutGrid } from 'lucide-vue-next';
-import AppLogo from './AppLogo.vue';
+import { useNavigation } from '@/composables/useNavigation'; // ← add
 import projects from '@/routes/projects';
+import { Link } from '@inertiajs/vue3';
+import AppLogo from './AppLogo.vue';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Projects',
-        href: projects.index(),
-        icon: LayoutGrid,
-    },
-];
+const { navigation } = useNavigation(); // ← add, remove hardcoded items
 </script>
 
 <template>
@@ -38,11 +31,9 @@ const mainNavItems: NavItem[] = [
                 </SidebarMenuItem>
             </SidebarMenu>
         </SidebarHeader>
-
         <SidebarContent>
-            <NavMain :items="mainNavItems" />
+            <NavMain :items="navigation" />
         </SidebarContent>
-
         <SidebarFooter>
             <NavUser />
         </SidebarFooter>

@@ -7,11 +7,21 @@ import NewInstance from '@/components/NewInstance.vue';
 import CreateInstanceCard from '@/components/CreateInstanceCard.vue';
 import ProjectCard from '@/components/ProjectCard.vue';
 import projectsRoute from '@/routes/projects';
+import { useNavigation } from '@/composables/useNavigation';
+import { LayoutDashboard, Settings } from 'lucide-vue-next';
+import projects from '@/routes/projects';
 
 const showModal = ref(false);
 
 const page = usePage();
-const projects = computed(() => page.props.projects);
+const projectsItems = computed(() => page.props.projects);
+
+const { setNavigation } = useNavigation();
+
+setNavigation([
+    { title: 'Projects', href: projects.index(), icon: LayoutDashboard },
+    { title: 'Settings', href: '/settings', icon: Settings },
+]);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -35,7 +45,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                 class="grid auto-rows-[250px] grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-3"
             >
                 <ProjectCard
-                    v-for="project in projects"
+                    v-for="project in projectsItems"
                     :key="project.id"
                     :id="project.id"
                     :name="project.name"

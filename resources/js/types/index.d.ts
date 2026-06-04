@@ -42,6 +42,12 @@ export type AppPageProps<T extends Record<string, unknown> = Record<string, unkn
             id: number;
             name: string;
             state: string;
+            containers: Array<{
+                id: number;
+                name: string;
+                state: string;
+                container_id: string;
+            }>
         }
     };
 

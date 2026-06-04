@@ -1,21 +1,27 @@
 <script setup lang="ts">
 import AppLayout from '@/layouts/AppLayout.vue';
-import type { BreadcrumbItem } from '@/types';
 import projectsRoute from '@/routes/projects';
 import { router, usePage } from '@inertiajs/vue3';
 import { Card } from '@/components/ui/card';
 import Health from '@/components/Health.vue';
 import Delete from '@/components/container/actions/delete.vue';
-import projects from '@/routes/projects';
+import { FolderOpen, LayoutDashboard } from 'lucide-vue-next';
+import { useNavigation } from '@/composables/useNavigation';
+import { BreadcrumbItem } from '@/types';
 
 const page = usePage();
 const project = page.props.project;
 
 function deleteProject() {
-    router.post(projects.delete(project.id));
+    router.post(projectsRoute.delete(project.id));
 }
 
-console.log(page.props);
+const { setNavigation } = useNavigation();
+
+setNavigation([
+    { title: 'Back', href: projectsRoute.index.url(), icon: LayoutDashboard },
+    { title: 'Status', href: projectsRoute.status.url(project.id), icon: FolderOpen },
+]);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
