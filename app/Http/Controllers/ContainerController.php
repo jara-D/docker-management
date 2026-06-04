@@ -19,30 +19,46 @@ class ContainerController extends Controller
         $this->adapter = $adapter;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        // List all containers
         return response()->json($this->adapter->listContainers());
     }
 
     public function start(string $id)
     {
-        return response()->json($this->adapter->startContainer($id));
+        $result = $this->adapter->startContainer($id);
+
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties(['container_id' => $id])
+            ->log("Container gestart: {$id}");
+
+        return response()->json($result);
     }
 
     public function stop(string $id)
     {
-        return response()->json($this->adapter->stopContainer($id));
+        $result = $this->adapter->stopContainer($id);
+
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties(['container_id' => $id])
+            ->log("Container gestopt: {$id}");
+
+        return response()->json($result);
     }
 
     public function delete(string $id)
     {
-        return response()->json($this->adapter->removeContainer($id));
-    }
+        $result = $this->adapter->removeContainer($id);
 
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties(['container_id' => $id])
+            ->log("Container verwijderd: {$id}");
+
+        return response()->json($result);
+    }
 
     public function sync(Request $request)
     {
@@ -51,7 +67,7 @@ class ContainerController extends Controller
         $service->sync($json);
 
         return response()->json(['message' => 'Containers synced']);
-     }
+    }
 
     public function createContainer(ComposeUpRequest $request)
     {
@@ -64,7 +80,6 @@ class ContainerController extends Controller
             'compose_yaml' => $request->yaml,
         ]);
 
-        // Put the id of the project into the container for identification
         foreach ($yaml['services'] as $name => $service) {
             $yaml['services'][$name]['labels']['sili.project_id'] = $project->id;
         }
@@ -76,15 +91,25 @@ class ContainerController extends Controller
             'yaml' => $yaml,
         ];
 
-        return response()->json(
-            $this->adapter->createContainerFromCompose($payload)
-        );
+        $result = $this->adapter->createContainerFromCompose($payload);
+
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties(['project_name' => $request->projectName])
+            ->log("Container aangemaakt: {$request->projectName}");
+
+        return response()->json($result);
     }
 
     public function deleteContainer(ComposeUpRequest $request)
     {
-        return response()->json(
-            $this->adapter->deleteContainerFromCompose($request->only(['projectName', 'yaml']))
-        );
+        $result = $this->adapter->deleteContainerFromCompose($request->only(['projectName', 'yaml']));
+
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties(['project_name' => $request->projectName])
+            ->log("Container stack verwijderd: {$request->projectName}");
+
+        return response()->json($result);
     }
 }
