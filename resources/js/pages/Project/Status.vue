@@ -10,6 +10,7 @@ import projects from '@/routes/projects';
 
 const page = usePage();
 const project = page.props.project;
+const logs = page.props.logs;
 
 function deleteProject() {
     router.post(projects.delete(project.id));
@@ -54,6 +55,21 @@ const breadcrumbs: BreadcrumbItem[] = [
                 >
                     Delete
                 </button>
+            </card>
+            <!-- NIEUW: Activity card -->
+            <card class="max-w-sm gap-1 p-3">
+                <h1 class="text-2xl font-bold">Activity</h1>
+                <div v-if="logs && logs.length > 0">
+                    <div
+                        v-for="log in logs"
+                        :key="log.id"
+                        class="border-b py-2 text-sm"
+                    >
+                        <span class="text-xs text-gray-500">{{ new Date(log.created_at).toLocaleString() }}</span>
+                        <p>{{ log.description }}</p>
+                    </div>
+                </div>
+                <p v-else class="text-sm text-gray-500">No activity</p>
             </card>
         </div>
     </AppLayout>

@@ -6,14 +6,13 @@ use App\Adapters\GoServiceAdapter;
 use App\Models\Project;
 use App\Services\ContainerSyncService;
 use Auth;
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
-use Log;
+use Spatie\Activitylog\Models\Activity;
 
 class ProjectController extends Controller
-{
+    {
     public function __construct(
         protected GoServiceAdapter $go
     ) {}
@@ -26,7 +25,6 @@ class ProjectController extends Controller
             ->get(['id', 'name', 'type'])
             ->makeHidden('containers');
 
-
         return Inertia::render('Projects', [
             'projects' => $projects,
         ]);
@@ -35,11 +33,17 @@ class ProjectController extends Controller
     public function status(Project $project): Response
     {
         $project->load([
-            'containers:id,project_id,name,state,image'
+            'containers:id,project_id,name,state,image',
         ]);
+
+        $logs = Activity::where('properties->project_id', $project->id)
+            ->latest()
+            ->take(20)
+            ->get(['id', 'description', 'created_at']);
 
         return Inertia::render('Project/Status', [
             'project' => $project,
+            'logs' => $logs,
         ]);
     }
 
@@ -52,25 +56,31 @@ class ProjectController extends Controller
             $response = $this->go->startContainer($container->container_id);
             $decoded = json_decode(json_encode($response));
 
-            if (!isset($decoded->result->state) || $decoded->result->state !== 'started') {
+            if (! isset($decoded->result->state) || $decoded->result->state !== 'started') {
                 $failures[] = $container->container_id;
             }
         }
 
         $dockerData = $this->go->listContainers();
+        app(ContainerSyncService::class)->projectSync($project->id, $dockerData);
 
-        app(ContainerSyncService::class)->projectSync(
-            $project->id,
-            $dockerData
-        );
+        if (! empty($failures)) {
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties(['project_id' => $project->id])
+                ->log("Project starten mislukt: {$project->name}");
 
-        if (!empty($failures)) {
             return back()->with('flash', [
                 'title' => 'Failed',
                 'message' => 'Some containers failed to start',
                 'type' => 'error',
             ]);
         }
+
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties(['project_id' => $project->id])
+            ->log("Project gestart: {$project->name}");
 
         return back()->with('flash', [
             'title' => 'Started',
@@ -79,38 +89,40 @@ class ProjectController extends Controller
         ]);
     }
 
-
-    /**
-     * @throws GuzzleException
-     */
     public function stop(Project $project): RedirectResponse
     {
         $project->load('containers:id,project_id,container_id');
 
-        $failures =[];
+        $failures = [];
         foreach ($project->containers as $container) {
             $response = $this->go->stopContainer($container->container_id);
             $decoded = json_decode(json_encode($response));
 
-            if (!isset($decoded->result->state) || $decoded->result->state !== 'stopped') {
+            if (! isset($decoded->result->state) || $decoded->result->state !== 'stopped') {
                 $failures[] = $container->container_id;
             }
         }
 
         $dockerData = $this->go->listContainers();
+        app(ContainerSyncService::class)->projectSync($project->id, $dockerData);
 
-        app(ContainerSyncService::class)->projectSync(
-            $project->id,
-            $dockerData
-        );
+        if (! empty($failures)) {
+            activity()
+                ->causedBy(Auth::user())
+                ->withProperties(['project_id' => $project->id])
+                ->log("Project stoppen mislukt: {$project->name}");
 
-        if (!empty($failures)) {
             return back()->with('flash', [
                 'title' => 'Failed',
                 'message' => 'Some containers failed to stop',
                 'type' => 'error',
             ]);
         }
+
+        activity()
+            ->causedBy(Auth::user())
+            ->withProperties(['project_id' => $project->id])
+            ->log("Project gestopt: {$project->name}");
 
         return back()->with('flash', [
             'title' => 'Stopped',
